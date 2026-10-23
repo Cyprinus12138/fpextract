@@ -1,0 +1,27 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Pipeline outputs
+output/
+*.jsonl
+!tests/fixtures/*.jsonl
+!samples/*.jsonl
+.batch_state.json
+*.log
+
+# Model weights (download separately; see docs)
+weights/
+*.pth
+*.pkl
+
+# Local
+.env
+.DS_Store

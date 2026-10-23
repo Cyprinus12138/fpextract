@@ -1,0 +1,159 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/Cyprinus12138/fpextract/schema/extraction-v1.json",
+  "title": "fpextract floor-plan extraction (per image)",
+  "description": "Tool-use input_schema forced on the vision model. One image may show multiple unit types (e.g. mirrored 'A1 / A1m' on one sheet); always return units as a list, even with a single unit. For non-unit-plan images (site_map, facility_plan, other), units must be an empty array.",
+  "type": "object",
+  "required": [
+    "classification",
+    "confidence",
+    "units"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "classification": {
+      "type": "string",
+      "enum": [
+        "unit_plan",
+        "hybrid",
+        "site_map",
+        "facility_plan",
+        "other"
+      ],
+      "description": "unit_plan = one or more residential units shown in plan view (room-level detail), no unit numbers visible; hybrid = single sheet with BOTH the storey/site-map layout AND per-unit room-level floor plans, with unit numbers visible (e.g. 'C8 02-06 to 08-06') — populate both `units` and `unit_number_map`; site_map = top-down block layout with unit numbers but NO room-level detail inside each cell; facility_plan = pool/gym/BBQ etc.; other = anything else (logos, key plans, marketing illustrations)."
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Your confidence in this extraction overall."
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional free text. Anything you noticed but couldn't fit into the structured fields."
+    },
+    "unit_number_map": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string"
+      },
+      "description": "Maps individual unit numbers (e.g. '05-12', '#05-12') to their unit_type labels (e.g. 'B1', 'C8', 'A1-G'). Populate whenever unit numbers are visible ANYWHERE on the sheet — regardless of classification. Sources include cell labels in site-map / hybrid layouts, comma-separated lists under a unit-type heading on a unit_plan sheet (e.g. 'Unit #02-22, #04-12, #04-14'), and stack-view tables at the bottom of the sheet (rows = storeys, columns = positions, each cell prints both unit number and unit_type). One key per unit number — NEVER a range. Range labels like 'C8 02-06 to 08-06' on a 2nd-to-8th-storey sheet are expanded into one key per storey: {'02-06': 'C8', '03-06': 'C8', ..., '08-06': 'C8'}. Use the unit-number format exactly as drawn (keep '#' prefix or block prefix like 'B1-#02-03' if printed). Leave empty only when no unit numbers appear anywhere on the sheet."
+    },
+    "units": {
+      "type": "array",
+      "description": "One entry per distinct unit floor shown on the sheet. Empty array if classification != unit_plan.",
+      "items": {
+        "type": "object",
+        "required": [
+          "unit_type",
+          "crop_frac"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "unit_type": {
+            "type": "string",
+            "description": "As labelled on the drawing, e.g. '2BR Type B1', 'Penthouse PH3'. Use 'Unknown' if unlabelled."
+          },
+          "floor_label": {
+            "type": "string",
+            "description": "Used in two scenarios — disambiguate by the value you write. (1) Multi-storey units (duplex, penthouse, maisonette): which floor of the unit this plan represents, e.g. 'Lower Floor', 'Upper Floor'. Two entries sharing unit_type but with different floor_label values are floors of the same unit. (2) Typical floor plate sheets: which storey range of the building this unit belongs to, e.g. '2nd Storey', '3rd-11th Storey'. Same unit_type appearing on different storey rows with layout differences gets a separate entry per row."
+          },
+          "bedrooms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "bathrooms": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "total_area_sqm": {
+            "type": "number",
+            "exclusiveMinimum": 0,
+            "description": "Strata / total area as printed on the drawing."
+          },
+          "balcony_sqm": {
+            "type": "number",
+            "minimum": 0
+          },
+          "facing": {
+            "type": "string",
+            "enum": [
+              "N",
+              "NE",
+              "E",
+              "SE",
+              "S",
+              "SW",
+              "W",
+              "NW",
+              "unknown"
+            ],
+            "description": "Compass direction the main living area faces, derived from the drawing's North arrow."
+          },
+          "rooms": {
+            "type": "array",
+            "description": "Semantic room list — names and areas only, no geometry.",
+            "items": {
+              "type": "object",
+              "required": [
+                "label"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "label": {
+                  "type": "string",
+                  "description": "Room label exactly as printed, e.g. 'Master Bedroom', 'Bath 2', 'A/C Ledge'."
+                },
+                "area_sqm": {
+                  "type": "number",
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          },
+          "windows": {
+            "type": "array",
+            "description": "One entry per window. Room name and which wall it is on.",
+            "items": {
+              "type": "object",
+              "required": [
+                "room",
+                "wall"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "room": {
+                  "type": "string"
+                },
+                "wall": {
+                  "type": "string",
+                  "enum": [
+                    "N",
+                    "S",
+                    "E",
+                    "W"
+                  ]
+                },
+                "width_mm": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0
+                }
+              }
+            }
+          },
+          "crop_frac": {
+            "type": "array",
+            "items": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "minItems": 4,
+            "maxItems": 4,
+            "description": "[x_min, y_min, x_max, y_max] as fractions of the image dimensions (0 = left/top edge, 1 = right/bottom edge). Tight bounding box around ONE instance of this unit_type — include its walls, room labels, dimension annotations, and immediately-adjacent compass/scale; exclude the unit-type title block, area legend, watermarks, tower-locator insets, and neighbouring cells of any other unit_type. Hard constraints: (1) coordinates must stay inside the drawn area — never extend into empty page margin or past the building footprint; (2) two crop_frac values for different unit_types must not overlap by area, only meet along their shared boundary at most; (3) when the same unit_type appears in multiple cells on a typical-floor-plate / hybrid sheet, pick the clearest single instance and crop only that cell — don't span multiple instances or include corridors between them. unit_number_map records where every numbered instance lives; crop_frac is the visual for one of them."
+          }
+        }
+      }
+    }
+  }
+}
