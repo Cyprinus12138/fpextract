@@ -22,9 +22,12 @@ rooms, areas, bedrooms, facing, unit-number maps, and a clean crop per unit.
 
 ## Tool-forced schemas beat prompting for JSON
 
-With a schema-forced tool call the model cannot return malformed output,
-and `additionalProperties: false` stops field drift. Plain-JSON prompting
-is still needed for VLMs without function calling (Qwen-VL on vLLM), where
+The client uses `tool_choice` to force a call to the extraction tool with an
+explicit schema. This reduces formatting errors, and
+`additionalProperties: false` declares that extra fields are not allowed.
+The client does not enable strict mode: forcing the tool call does not
+guarantee schema compliance, which depends on the model and endpoint.
+Plain-JSON prompting is still needed for VLMs without function calling (Qwen-VL on vLLM), where
 three failure modes had to be handled explicitly: `<think>…</think>`
 chain-of-thought in the reply, the answer landing in `reasoning_content`
 with an empty `content`, and truncation when the thinking budget eats the
@@ -71,7 +74,7 @@ Collapsing on any `floor_label` difference falsely summed bedrooms across
 storey keyword (ground, upper, lower, level N, Nth storey, attic, …) are
 treated as storeys of one unit.
 
-## Watermarks: three approaches, three trade-offs
+## Watermark removal approaches and trade-offs
 
 - **SLBR end-to-end** removes the mark but runs at 512×512, so the output
   is blurry. Using SLBR only for the *mask* and inpainting at native
@@ -91,7 +94,9 @@ treated as storeys of one unit.
 
 Half price is the headline, but the operational property that mattered was
 crash safety: persist the `batch_id` atomically before doing anything else,
-and never re-submit. A 30K-image run spans hours and will be interrupted.
+and resume recorded batches instead of re-submitting them. This does not
+cover a failure between provider acceptance and saving the ID. A 30K-image
+run spans hours and may be interrupted.
 
 ## Costs
 

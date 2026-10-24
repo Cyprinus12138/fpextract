@@ -1,8 +1,9 @@
 # Pipeline
 
 `fpextract` turns a folder of floor-plan images into two queryable layers:
-one record per **image** and one record per **project**. Everything after
-the first stage is local, free and regenerable.
+one record per **image** and one record per **project**. Aggregation and data
+quality processing run locally without further LLM calls. The optional
+`classify` and `try-crop` commands make additional LLM calls.
 
 ```
    <root>/<project>/*.png   or   manifest.jsonl           (input contract)
@@ -71,7 +72,7 @@ ranges expanded to one key per unit. The prompt is in
 
 | `--mode` | How | Works with | Batch |
 |---|---|---|---|
-| `tool` (default) | the schema is forced as a tool / function call, so output is always valid | Anthropic, OpenAI, any OpenAI-compatible server with function calling | yes |
+| `tool` (default) | forces a call to the extraction tool via `tool_choice` (no strict mode), so schema compliance depends on the model and endpoint | Anthropic, OpenAI, any OpenAI-compatible server with function calling | yes |
 | `json` | plain-JSON prompt, tolerant parser (`<think>` blocks, code fences, reasoning fields), retry on truncation | Qwen3-VL / Qwen2.5-VL (vLLM, DashScope), LLaVA, InternVL, Ollama models without tools | no |
 
 In `json` mode pass `--coord` to say which coordinate system the model
@@ -107,10 +108,11 @@ submits chunk by chunk. **Every `batch_id` is written to
 `.batch_state.json` via temp-file + atomic rename the moment `submit`
 returns**, with no other I/O in between. Consequences:
 
-- a crash, Ctrl-C or network drop never loses track of submitted work; just
-  run the same command again — in-flight batches are polled and collected
-  first, then any still-pending images are submitted;
-- a batch is never re-submitted (that would pay for the same tokens twice);
+- re-running the same command resumes batches recorded in the state file
+  and submits images that are neither finished nor already in flight;
+- recorded batches are not re-submitted. A failure after the provider accepts
+  a batch but before its ID is saved can leave the batch untracked; atomic
+  rename protects the state file from partial writes, not this submission gap;
 - polling and collection errors are non-fatal and retried next cycle; the
   state file is only updated after a batch is fully collected;
 - the state file refuses to load under a different `--provider`.

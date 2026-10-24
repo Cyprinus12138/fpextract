@@ -14,7 +14,8 @@ All notable changes to this project are documented here. The format follows
 - `extract` stage: sync runs with a thread pool, and batch runs on the provider
   batch API with auto-chunking to provider limits and a crash-safe state file
   (atomic rename right after every submit) so an interrupted run resumes
-  without re-spending tokens.
+  recorded batches without re-submitting them. A failure before the batch ID
+  is saved can still leave submitted work untracked.
 - `aggregate` stage: optional sheet-title reconciliation, multi-storey unit
   collapse, unit-number vote merging with per-entity evidence, conflicts and
   confidence, and project-level property-type inference.
@@ -33,5 +34,3 @@ All notable changes to this project are documented here. The format follows
   kernel.
 - Per-unit `confidence` and `field_disagreements` are carried through the
   multi-storey collapse instead of being dropped.
-- Error rows in `json` mode are retried on re-run (tool-mode error rows are
-  treated as done, as before).

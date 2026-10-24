@@ -1,5 +1,7 @@
 # fpextract
 
+**English** · [简体中文](README.zh-CN.md)
+
 **Structured floor-plan extraction with vision LLMs:** a provider-agnostic
 client, batch API with auto-chunking and crash-safe resume, LLM
 localisation refined by OpenCV, and project-level rollups with provenance
@@ -14,20 +16,23 @@ Give it a folder of floor-plan images; get back one JSON record per image
 (classification, units with rooms / areas / bedrooms / facing and a crop
 box, unit-number map) and one record per project (plan types with
 provenance and confidence, unit-number lookup with evidence and conflicts,
-multi-storey units, property type). Everything after the LLM call is local
-and regenerable.
+multi-storey units, property type). Aggregation and data-quality processing
+run locally and can be repeated without further LLM calls.
 
 ## Features
 
 - **Provider-agnostic.** Anthropic, OpenAI, and any OpenAI-compatible
   endpoint (vLLM, Ollama, LM Studio, DashScope, Azure). Two prompting
-  strategies: schema-forced **tool** calls, or a plain-**json** prompt for
-  VLMs without function calling (Qwen3-VL, Qwen2.5-VL, LLaVA, …) with
-  chain-of-thought stripping and per-model bounding-box normalisation.
+  strategies: **tool** mode forces a call to the extraction tool via
+  `tool_choice`, with an extraction schema but no strict mode; schema
+  compliance depends on the model and endpoint. A plain-**json** prompt
+  supports VLMs without function calling (Qwen3-VL, Qwen2.5-VL, LLaVA, …),
+  with chain-of-thought stripping and per-model bounding-box normalisation.
 - **Batch API with crash-safe resume.** Half price, auto-chunked to provider
   limits, every `batch_id` persisted by atomic rename the moment it is
-  returned. Interrupt it at any point and run the same command again; no
-  batch is ever re-submitted.
+  returned. Re-run the same command to resume batches recorded in the state
+  file without re-submitting them. A failure between provider acceptance and
+  saving the ID can leave a submitted batch untracked.
 - **LLM localisation refined by OpenCV.** The model gives a rough crop per
   unit; OpenCV snaps it to the drawing's actual content on white, dark or
   branded backgrounds. Plus background normalisation and weight-free tiled
@@ -66,6 +71,14 @@ fpextract extract --input /data/plans --output out/extractions.jsonl --batch
 The images under `samples/` are synthetic (drawn by
 `scripts/make_samples.py`, CC0); see
 [`samples/README.md`](samples/README.md) for pointing the CLI at your own.
+
+## Reviewing extractions in ProProp
+
+In ProProp, this pipeline's output feeds the operations console's Data Studio, where a person reviews the projects the extractor and the reconciler flag. The floor plans are blurred in these shots: they are developers' brochure images, and this repository ships no third-party imagery.
+
+<table>
+<tr><td width="33%" valign="top"><a href="docs/images/proprop-data-studio.png"><img src="docs/images/proprop-data-studio.png" width="270" alt="Data Studio: flagged projects, lowest confidence first"></a><br><sub><b>Data Studio.</b> Projects flagged for a human pass, lowest confidence first.</sub></td><td width="33%" valign="top"><a href="docs/images/proprop-reconcile.png"><img src="docs/images/proprop-reconcile.png" width="270" alt="A project's source sheet beside its extracted units"></a><br><sub><b>One project.</b> The source sheet beside its units: area, bedrooms and bathrooms, storeys.</sub></td><td width="33%" valign="top"><a href="docs/images/proprop-room-editor.png"><img src="docs/images/proprop-room-editor.png" width="270" alt="Correcting room boxes by hand"></a><br><sub><b>Room editor.</b> Redrawing a unit's room boxes, with a required reason for the audit log.</sub></td></tr>
+</table>
 
 ## Pipeline
 
@@ -121,7 +134,7 @@ ruff check . && pytest -q
 python scripts/make_samples.py   # regenerate the synthetic samples
 ```
 
-Tests run offline; the LLM client is faked.
+Tests run offline with a test double for the LLM client.
 
 ## Licence
 
