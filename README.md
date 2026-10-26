@@ -138,10 +138,6 @@ Tests run offline with a test double for the LLM client.
 
 ## Licence
 
-[PolyForm Noncommercial 1.0.0](LICENSE). Use for personal, research,
-educational and other noncommercial purposes is free. **Commercial use
-requires a separate licence** — contact the author. Attribution is
-required: keep the `Required Notice` line and the [NOTICE](NOTICE) file
-with any copy. The synthetic samples are CC0.
+[MIT](LICENSE). The synthetic samples are CC0.
 
 Copyright 2026 Mr.Cyprinus (https://github.com/Cyprinus12138)

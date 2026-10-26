@@ -8,13 +8,13 @@ version = "0.1.0"
 description = "Structured floor-plan extraction with vision LLMs: provider-agnostic client, batch API with crash-safe resume, LLM localisation refined by OpenCV, and project-level rollups with provenance and confidence."
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "PolyForm-Noncommercial-1.0.0"}
+license = {text = "MIT"}
 authors = [{name = "Mr.Cyprinus"}]
 keywords = ["floor-plan", "vision", "llm", "extraction", "real-estate", "anthropic", "openai", "qwen"]
 classifiers = [
   "Development Status :: 4 - Beta",
   "Intended Audience :: Developers",
-  "License :: Other/Proprietary License",
+  "License :: OSI Approved :: MIT License",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",

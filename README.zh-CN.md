@@ -106,6 +106,6 @@ python scripts/make_samples.py   # regenerate the synthetic samples
 
 ## 许可
 
-[PolyForm Noncommercial 1.0.0](LICENSE)。个人、研究、教育和其他非商业用途免费。**商业使用需要另行授权**，请联系作者。必须署名：任何副本都要保留 `Required Notice` 一行和 [NOTICE](NOTICE) 文件。合成样例采用 CC0 授权。
+[MIT](LICENSE)。合成样例采用 CC0 授权。
 
 Copyright 2026 Mr.Cyprinus (https://github.com/Cyprinus12138)
