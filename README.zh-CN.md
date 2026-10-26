@@ -4,6 +4,10 @@
 
 **使用视觉大模型提取户型图中的结构化信息：** 提供不依赖特定厂商的客户端、支持自动分批和崩溃恢复的批量 API、结合 OpenCV 优化的大模型定位，以及带有来源记录和置信度的楼盘级汇总。
 
+[![CI](https://github.com/Cyprinus12138/fpextract/actions/workflows/ci.yml/badge.svg)](https://github.com/Cyprinus12138/fpextract/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 本项目从 [ProProp](https://proprop.algonavis.com/) 中独立出来。ProProp 是已投入生产使用的新加坡 AI 房产顾问，这套处理流程已从约 30,000 张户型图中提取结构化住宅单元数据，用于构建顾问知识库。
 
 输入一个户型图文件夹，即可为每张图片生成一条 JSON 记录，包含图纸分类、住宅单元及其房间、面积、卧室数、朝向、裁剪框和房号映射；同时为每个楼盘生成一条汇总记录，包含带来源和置信度的户型、附有证据及冲突记录的房号索引、跃层单元，以及物业类型。汇总和数据质量处理均在本地运行，可重复执行，无需再次调用大模型。
@@ -19,9 +23,9 @@
 ## 快速开始
 
 ```bash
-pip install fpextract            # core: anthropic + pillow
-pip install 'fpextract[cv]'      # + OpenCV for try-crop / try-norm
-pip install 'fpextract[openai]'  # + OpenAI-compatible endpoints
+pip install 'git+https://github.com/Cyprinus12138/fpextract'                       # core: anthropic + pillow
+pip install 'fpextract[cv] @ git+https://github.com/Cyprinus12138/fpextract'      # + OpenCV for try-crop / try-norm
+pip install 'fpextract[openai] @ git+https://github.com/Cyprinus12138/fpextract'  # + OpenAI-compatible endpoints
 ```
 
 ```bash

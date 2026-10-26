@@ -205,7 +205,7 @@ count, replicated records, phantom plan types, conflict leaderboard. The
 cleaner applies seven targeted, idempotent rules (see the module docstring
 in `dq/clean.py`) and writes a report of every row it touched.
 
-## CV helpers (`pip install 'fpextract[cv]'`)
+## CV helpers (the `cv` extra)
 
 - `fpextract try-crop IMAGE` — LLM box (orange) vs OpenCV-refined box
   (green). The refinement thresholds inside the padded LLM box (strategy
@@ -216,7 +216,7 @@ in `dq/clean.py`) and writes a report of every row it touched.
   removal (template matched from the image itself, grid-projected, letter
   stencil inpainted), optional SLBR mask + TELEA inpaint.
 
-## Postgres sink (`pip install 'fpextract[pg]'`)
+## Postgres sink (the `pg` extra)
 
 ```bash
 export DATABASE_URL=postgres://user:pass@host/db

@@ -7,6 +7,10 @@ client, batch API with auto-chunking and crash-safe resume, LLM
 localisation refined by OpenCV, and project-level rollups with provenance
 and confidence.
 
+[![CI](https://github.com/Cyprinus12138/fpextract/actions/workflows/ci.yml/badge.svg)](https://github.com/Cyprinus12138/fpextract/actions/workflows/ci.yml)
+[![Python](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](pyproject.toml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 Extracted from [ProProp](https://proprop.algonavis.com/), an AI property
 advisor for Singapore running in production, where this pipeline extracted
 structured unit data from about 30,000 floor plans for the advisory
@@ -47,9 +51,9 @@ run locally and can be repeated without further LLM calls.
 ## Quickstart
 
 ```bash
-pip install fpextract            # core: anthropic + pillow
-pip install 'fpextract[cv]'      # + OpenCV for try-crop / try-norm
-pip install 'fpextract[openai]'  # + OpenAI-compatible endpoints
+pip install 'git+https://github.com/Cyprinus12138/fpextract'                       # core: anthropic + pillow
+pip install 'fpextract[cv] @ git+https://github.com/Cyprinus12138/fpextract'      # + OpenCV for try-crop / try-norm
+pip install 'fpextract[openai] @ git+https://github.com/Cyprinus12138/fpextract'  # + OpenAI-compatible endpoints
 ```
 
 ```bash
